@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import {
   Heart, MessageCircle, MapPin, Utensils, Users, Hotel, Sparkles,
-  Send, Moon, Sun, ChevronRight, X, User, Globe, Coffee, Wine,
-  Sunset, Music, BookOpen, Star, ArrowRight
+  Send, Moon, Sun, ChevronRight, X, User, Coffee, Wine,
+  Sunset, Music, BookOpen, Star, ArrowRight, ExternalLink,
+  Navigation, Filter, GlassWater, PartyPopper, Globe, Calendar,
+  Briefcase, Laptop, Camera, Bike, Dumbbell, Languages, Palette
 } from 'lucide-react';
 
 interface Message {
@@ -20,6 +22,84 @@ interface UserProfile {
   preferences: string;
   name: string;
 }
+
+// Comprehensive meeting places data
+const meetingPlaces = {
+  nightlife: [
+    { name: "Bairro Alto", type: "Nightlife District", desc: "Historic neighborhood with dozens of bars, Fado houses, and clubs. Best Thursday-Saturday nights.", crowd: "Mixed ages 25-40, tourists & locals", tip: "Start at Pensão Amor, end at Lux", link: "https://www.google.com/search?q=Bairro+Alto+Lisbon+bars" },
+    { name: "Lux Frágil", type: "Club", desc: "Lisbon's most famous nightclub with top DJs. Industrial-chic design, great for dancing.", crowd: "25-35, fashion-forward, international", tip: "Go after 2am, dress stylish", link: "https://www.google.com/search?q=Lux+Fragil+Lisbon+club" },
+    { name: "Pensão Amor", type: "Bar", desc: "Burlesque-themed bar in a former brothel. Unique atmosphere, great cocktails.", crowd: "30-45, creative types, expats", tip: "Ask for the hidden room", link: "https://www.google.com/search?q=Pensao+Amor+Lisbon" },
+    { name: "Park Bar", type: "Rooftop Bar", desc: "Hidden rooftop on a parking garage. Stunning sunset views, relaxed vibe.", crowd: "25-35, young professionals", tip: "Arrive before sunset, bring friends", link: "https://www.google.com/search?q=Park+Bar+Lisbon+rooftop" },
+    { name: "Red Frog", type: "Speakeasy", desc: "Craft cocktail bar with intimate setting. Perfect for conversation.", crowd: "28-40, cocktail enthusiasts", tip: "Try their signature drinks", link: "https://www.google.com/search?q=Red+Frog+Lisbon+cocktails" },
+    { name: "Silício Club", type: "Underground Club", desc: "Electronic music venue in Marvila. Industrial setting, authentic crowd.", crowd: "20-30, music lovers, locals", tip: "Check their Instagram for events", link: "https://www.google.com/search?q=Silicio+Club+Lisbon" },
+    { name: "Topo Chiado", type: "Rooftop", desc: "Elegant rooftop with castle views. Great for sophisticated dates.", crowd: "30-50, professionals", tip: "Reserve for weekend evenings", link: "https://www.google.com/search?q=Topo+Chiado+Lisbon" },
+    { name: "Monkey Mash", type: "Tiki Bar", desc: "Fun tiki-themed bar with rum cocktails. Lively atmosphere.", crowd: "25-35, fun-loving crowd", tip: "Great for group outings", link: "https://www.google.com/search?q=Monkey+Mash+Lisbon" },
+  ],
+  
+  coworking: [
+    { name: "Second Home", type: "Coworking", desc: "Beautiful space in LX Factory with 200+ plants. Very social, great community.", crowd: "Digital nomads, creatives, entrepreneurs", tip: "Join their community events", link: "https://www.google.com/search?q=Second+Home+Lisbon+coworking" },
+    { name: "Heden", type: "Coworking", desc: "Multiple locations across Lisbon. Modern, professional atmosphere.", crowd: "Remote workers, startups", tip: "Try the Príncipe Real location", link: "https://www.google.com/search?q=Heden+Lisbon+coworking" },
+    { name: "Impact Hub", type: "Coworking", desc: "Social impact focused workspace. Great networking events.", crowd: "Social entrepreneurs, changemakers", tip: "Attend their Thursday socials", link: "https://www.google.com/search?q=Impact+Hub+Lisbon" },
+    { name: "Cowork Lisboa", type: "Coworking", desc: "Located in LX Factory. Creative community, affordable.", crowd: "Freelancers, designers", tip: "Good for long-term members", link: "https://www.google.com/search?q=Cowork+Lisboa+LX+Factory" },
+    { name: "WeWork", type: "Coworking", desc: "Multiple locations with premium amenities. Professional networking.", crowd: "Corporate remote workers, startups", tip: "Try the Avenida da Liberdade location", link: "https://www.google.com/search?q=WeWork+Lisbon" },
+    { name: "Village Underground", type: "Creative Hub", desc: "Unique space made from shipping containers and buses. Very artistic.", crowd: "Artists, musicians, creatives", tip: "Check their event calendar", link: "https://www.google.com/search?q=Village+Underground+Lisbon" },
+  ],
+  
+  socialEvents: [
+    { name: "Lisbon Digital Nomads Meetup", type: "Weekly Meetup", desc: "Regular gatherings for remote workers. Very welcoming community.", crowd: "Digital nomads, expats, travelers", tip: "Check Meetup.com for schedule", link: "https://www.google.com/search?q=Lisbon+Digital+Nomads+Meetup" },
+    { name: "Web Summit", type: "Tech Conference", desc: "World's largest tech conference in November. Massive networking opportunity.", crowd: "Tech professionals, entrepreneurs, investors", tip: "Get tickets early, use networking app", link: "https://www.google.com/search?q=Web+Summit+Lisbon" },
+    { name: "Lisbon Tech Meetups", type: "Various Meetups", desc: "Python, JavaScript, AI, startup meetups happening weekly.", crowd: "Developers, tech enthusiasts", tip: "Follow Lisbon Tech groups on Meetup", link: "https://www.google.com/search?q=Lisbon+tech+meetups" },
+    { name: "Startup Lisboa Events", type: "Startup Events", desc: "Pitch nights, founder dinners, networking sessions.", crowd: "Entrepreneurs, investors", tip: "Join their newsletter", link: "https://www.google.com/search?q=Startup+Lisboa+events" },
+    { name: "Lisbon Social Club", type: "Social Group", desc: "Organizes dinners, activities, trips for expats and locals.", crowd: "Expats, internationally-minded locals", tip: "Great for making friends first", link: "https://www.google.com/search?q=Lisbon+Social+Club" },
+    { name: "Internations Lisbon", type: "Expat Network", desc: "Premium expat community with regular events.", crowd: "Professionals, established expats", tip: "Membership required but worth it", link: "https://www.google.com/search?q=Internations+Lisbon" },
+  ],
+  
+  activities: [
+    { name: "LX Factory", type: "Creative Complex", desc: "Former factory turned creative hub. Shops, restaurants, rooftop bars, bookstores.", crowd: "Creatives, young professionals, tourists", tip: "Sunday market is great for meeting people", link: "https://www.google.com/search?q=LX+Factory+Lisbon" },
+    { name: "Timeout Market", type: "Food Hall", desc: "Communal dining with best Lisbon restaurants. Easy to strike conversations.", crowd: "Foodies, tourists, locals", tip: "Sit at communal tables, ask for recommendations", link: "https://www.google.com/search?q=Timeout+Market+Lisbon" },
+    { name: "Praça do Príncipe Real", type: "Neighborhood", desc: "Trendy area with brunch spots, boutiques, and gardens. Very expat-friendly.", crowd: "Expats, digital nomads, locals 25-40", tip: "Try Embaixada for shopping and drinks", link: "https://www.google.com/search?q=Praca+Principe+Real+Lisbon" },
+    { name: "Feira da Ladra", type: "Flea Market", desc: "Tuesday and Saturday market in Alfama. Great for browsing and chatting.", crowd: "Vintage lovers, locals, tourists", tip: "Go early, bring cash", link: "https://www.google.com/search?q=Feira+da+Ladra+Lisbon" },
+    { name: "MAAT", type: "Museum", desc: "Art, architecture, and technology museum by the river. Modern, social.", crowd: "Culture lovers, young professionals", tip: "Thursday evenings are free", link: "https://www.google.com/search?q=MAAT+Lisbon+museum" },
+    { name: "Oceanário de Lisboa", type: "Aquarium", desc: "World-class aquarium. Great for casual dates and meeting families.", crowd: "Families, couples, tourists", tip: "Go weekday mornings for fewer crowds", link: "https://www.google.com/search?q=Oceanario+de+Lisboa" },
+  ],
+  
+  sports: [
+    { name: "Lisbon Run Club", type: "Running Group", desc: "Regular running meetups across the city. Very social.", crowd: "Fitness enthusiasts, 25-40", tip: "Check Instagram for schedules", link: "https://www.google.com/search?q=Lisbon+Run+Club" },
+    { name: "Padel Clubs", type: "Sports", desc: "Padel is huge in Portugal. Many clubs offer social matches.", crowd: "Sporty types, professionals", tip: "Book through Playtomic app", link: "https://www.google.com/search?q=Padel+Lisbon+clubs" },
+    { name: "CrossFit Lisbon", type: "Gym", desc: "Multiple CrossFit boxes with strong communities.", crowd: "Fitness enthusiasts, 25-45", tip: "Try a drop-in class", link: "https://www.google.com/search?q=CrossFit+Lisbon" },
+    { name: "Surf Schools (Costa da Caparica)", type: "Surfing", desc: "30 min from Lisbon. Great surf community and lessons.", crowd: "Surfers, beach lovers, 20-35", tip: "Weekend surf trips are social", link: "https://www.google.com/search?q=Surf+Costa+Caparica+Lisbon" },
+    { name: "Yoga Studios", type: "Wellness", desc: "Many studios offer community classes and events.", crowd: "Wellness-focused, 25-50", tip: "Try Yoga Lisbon or Pure Yoga", link: "https://www.google.com/search?q=Yoga+Lisbon+studios" },
+    { name: "Cycling Groups", type: "Cycling", desc: "Groups ride along the river and to beaches.", crowd: "Cyclists, outdoor enthusiasts", tip: "Join Lisbon Cycling Club on Facebook", link: "https://www.google.com/search?q=Cycling+groups+Lisbon" },
+  ],
+  
+  languageExchange: [
+    { name: "Tandem Lisbon", type: "Language Exchange", desc: "App-based but organizes in-person meetups.", crowd: "Language learners, expats", tip: "Great for meeting locals who want to practice English", link: "https://www.google.com/search?q=Tandem+Lisbon+language+exchange" },
+    { name: "Language Exchange Lisbon Meetup", type: "Weekly Event", desc: "Regular meetups in bars for practicing languages.", crowd: "Multilingual crowd, expats, locals", tip: "Check Meetup.com for locations", link: "https://www.google.com/search?q=Language+Exchange+Lisbon+Meetup" },
+    { name: "Portuguese Language Schools", type: "Classes", desc: "Learning Portuguese is a great way to meet people.", crowd: "Expats committed to staying", tip: "Try Portuguese Connection or CIAL", link: "https://www.google.com/search?q=Portuguese+language+school+Lisbon" },
+  ],
+  
+  cultural: [
+    { name: "Fado Nights in Alfama", type: "Music", desc: "Traditional Portuguese music in intimate venues. Very romantic.", crowd: "Culture seekers, romantics, 30-50", tip: "Try Clube de Fado or A Baiuca", link: "https://www.google.com/search?q=Fado+Alfama+Lisbon" },
+    { name: "Jazz Clubs", type: "Music", desc: "Hot Clube de Portugal and other venues have great jazz.", crowd: "Music lovers, sophisticated crowd", tip: "Check schedule for international acts", link: "https://www.google.com/search?q=Jazz+clubs+Lisbon" },
+    { name: "Art Galleries (Chiado)", type: "Art", desc: "Many galleries with openings and events.", crowd: "Art lovers, creatives", tip: "Follow galleries on Instagram for openings", link: "https://www.google.com/search?q=Art+galleries+Chiado+Lisbon" },
+    { name: "Book Clubs", type: "Literary", desc: "Several English book clubs meet regularly.", crowd: "Readers, intellectuals", tip: "Check Lisbon Book Club on Facebook", link: "https://www.google.com/search?q=Book+club+Lisbon+English" },
+  ],
+  
+  expatHotspots: [
+    { name: "Cascais", type: "Beach Town", desc: "30 min train ride. Large British and international community.", crowd: "Established expats, families, wealthy retirees", tip: "Great for weekend trips and networking", link: "https://www.google.com/search?q=Cascais+expat+community" },
+    { name: "Príncipe Real", type: "Neighborhood", desc: "Most expat-friendly neighborhood in Lisbon center.", crowd: "Digital nomads, young expats", tip: "Live here if you want expat community", link: "https://www.google.com/search?q=Principe+Real+Lisbon+expats" },
+    { name: "Alfama", type: "Neighborhood", desc: "Traditional but increasingly international. Great Fado scene.", crowd: "Culture-loving expats, artists", tip: "Best for authentic Portuguese experience", link: "https://www.google.com/search?q=Alfama+Lisbon+neighborhood" },
+    { name: "Expat Facebook Groups", type: "Online Community", desc: "Lisbon Digital Nomads, Expats in Lisbon, Lisbon Social.", crowd: "All expats and nomads", tip: "Join before arriving to network", link: "https://www.google.com/search?q=Expats+in+Lisbon+Facebook+group" },
+  ],
+  
+  datingAppsTips: [
+    { app: "Tinder", tip: "Most popular in Lisbon. Good for casual dating. Many expats use it.", crowd: "18-35, mixed intentions" },
+    { app: "Bumble", tip: "Good for serious dating. Women message first. Popular with expats.", crowd: "25-40, relationship-focused" },
+    { app: "Hinge", tip: "Growing in Portugal. Good for meaningful connections.", crowd: "28-45, serious daters" },
+    { app: "Inner Circle", tip: "Premium app for professionals. Curated community.", crowd: "30-45, professionals" },
+    { app: "Badoo", tip: "Popular with Portuguese locals. More casual.", crowd: "18-30, locals" },
+  ],
+};
 
 const topicSuggestions = [
   { icon: Utensils, title: 'Restaurants for Dates', desc: 'Best spots by price & vibe', query: 'What are the best restaurants in Lisbon for a romantic date?' },
@@ -61,18 +141,6 @@ const lisbonData = {
     { name: "Jardim do Torel", desc: "Hidden garden with pool, ocean views", tip: "Quiet, perfect for picnics" },
     { name: "Palácio de Sintra", desc: "Day trip, fairytale palace", tip: "25 min train, magical for romance" },
     { name: "Praia do Guincho", desc: "Wild beach, dramatic cliffs", tip: "Sunset walks, beach bars nearby" },
-  ],
-  meetSingles: [
-    { place: "Bairro Alto", desc: "Nightlife hub, bars and Fado houses", crowd: "Mixed ages, tourists & locals" },
-    { place: "LX Factory", desc: "Creative hub, rooftop bars", crowd: "Young professionals, creatives" },
-    { place: "Timeout Market", desc: "Food hall, communal seating", crowd: "Easy to strike conversations" },
-    { place: "Praça do Príncipe Real", desc: "Trendy area, brunch spots", crowd: "Expats, digital nomads" },
-  ],
-  events: [
-    { name: "Web Summit", type: "Tech conference", when: "November", crowd: "Professionals, entrepreneurs" },
-    { name: "Lisbon Digital Nomads Meetup", type: "Weekly meetup", when: "Various locations", crowd: "Remote workers, expats" },
-    { name: "Fado in Chiado", type: "Live music", when: "Nightly", crowd: "Culture seekers" },
-    { name: "Ribeira Market", type: "Food & social", when: "Weekends", crowd: "Foodies, locals" },
   ],
   culture: {
     portuguese: {
@@ -152,20 +220,8 @@ ${profile.interestedIn === 'women' || profile.interestedIn === 'both' ? "\n💡 
 ${profile.interestedIn === 'men' || profile.interestedIn === 'both' ? "\n💡 Portuguese men often enjoy active dates - consider surfing in Costa da Caparica!" : ""}`;
   }
   
-  if (q.includes('meet') || q.includes('single') || q.includes('where')) {
-    let response = "👥 **Best Places to Meet Singles in Lisbon:**\n\n";
-    lisbonData.meetSingles.forEach(place => {
-      response += `📍 **${place.place}**\n${place.desc}\nCrowd: ${place.crowd}\n\n`;
-    });
-    response += "\n📅 **Events Worth Checking:**\n";
-    lisbonData.events.forEach(event => {
-      response += `• **${event.name}** (${event.when}) - ${event.crowd}\n`;
-    });
-    
-    if (profile.goals) {
-      response += `\n\n🎯 Based on your goals (${profile.goals}), I'd especially recommend LX Factory and the Digital Nomads Meetup - great for meeting like-minded people!`;
-    }
-    return response;
+  if (q.includes('meet') || q.includes('single') || q.includes('where') || q.includes('people')) {
+    return generateMeetingPlacesResponse(profile);
   }
   
   if (q.includes('conversation') || q.includes('start') || q.includes('approach') || q.includes('talk')) {
@@ -331,9 +387,135 @@ ${lisbonData.culture.expat.american}
 What would you like to know more about?`;
 }
 
+function generateMeetingPlacesResponse(profile: UserProfile): string {
+  let response = `👥 **Where to Meet People in Lisbon - Complete Guide**
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🌙 **NIGHTLIFE & BARS**
+
+`;
+  
+  meetingPlaces.nightlife.slice(0, 5).forEach(place => {
+    response += `• **${place.name}** (${place.type})\n  ${place.desc}\n  Crowd: ${place.crowd}\n  💡 ${place.tip}\n\n`;
+  });
+  
+  response += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💼 **COWORKING SPACES** (Perfect for digital nomads!)
+
+`;
+  
+  meetingPlaces.coworking.slice(0, 4).forEach(place => {
+    response += `• **${place.name}** (${place.type})\n  ${place.desc}\n  Crowd: ${place.crowd}\n  💡 ${place.tip}\n\n`;
+  });
+  
+  response += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📅 **SOCIAL EVENTS & MEETUPS**
+
+`;
+  
+  meetingPlaces.socialEvents.slice(0, 4).forEach(place => {
+    response += `• **${place.name}** (${place.type})\n  ${place.desc}\n  Crowd: ${place.crowd}\n  💡 ${place.tip}\n\n`;
+  });
+  
+  response += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 **ACTIVITIES & SOCIAL HOTSPOTS**
+
+`;
+  
+  meetingPlaces.activities.slice(0, 4).forEach(place => {
+    response += `• **${place.name}** (${place.type})\n  ${place.desc}\n  Crowd: ${place.crowd}\n  💡 ${place.tip}\n\n`;
+  });
+  
+  response += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🏃 **SPORTS & FITNESS**
+
+`;
+  
+  meetingPlaces.sports.slice(0, 4).forEach(place => {
+    response += `• **${place.name}** (${place.type})\n  ${place.desc}\n  Crowd: ${place.crowd}\n  💡 ${place.tip}\n\n`;
+  });
+  
+  response += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🗣️ **LANGUAGE EXCHANGE**
+
+`;
+  
+  meetingPlaces.languageExchange.forEach(place => {
+    response += `• **${place.name}** (${place.type})\n  ${place.desc}\n  Crowd: ${place.crowd}\n  💡 ${place.tip}\n\n`;
+  });
+  
+  response += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎨 **CULTURAL EVENTS**
+
+`;
+  
+  meetingPlaces.cultural.slice(0, 3).forEach(place => {
+    response += `• **${place.name}** (${place.type})\n  ${place.desc}\n  Crowd: ${place.crowd}\n  💡 ${place.tip}\n\n`;
+  });
+  
+  response += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🌍 **EXPAT HOTSPOTS**
+
+`;
+  
+  meetingPlaces.expatHotspots.slice(0, 3).forEach(place => {
+    response += `• **${place.name}** (${place.type})\n  ${place.desc}\n  Crowd: ${place.crowd}\n  💡 ${place.tip}\n\n`;
+  });
+  
+  response += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📱 **DATING APPS IN LISBON**
+
+`;
+  
+  meetingPlaces.datingAppsTips.forEach(app => {
+    response += `• **${app.app}** - ${app.tip}\n  Crowd: ${app.crowd}\n\n`;
+  });
+  
+  // Add personalized recommendations
+  if (profile.goals || profile.interestedIn || profile.age) {
+    response += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 **PERSONALIZED FOR YOU**
+
+`;
+    
+    if (profile.age === '18-25' || profile.age === '26-35') {
+      response += `Based on your age, I recommend: **Lux Frágil**, **Bairro Alto**, and **LX Factory** - these have the youngest, most dynamic crowds.\n\n`;
+    }
+    if (profile.age === '36-45' || profile.age === '46+') {
+      response += `Based on your age, I recommend: **Pensão Amor**, **Topo Chiado**, and **Internations events** - more sophisticated crowds.\n\n`;
+    }
+    
+    if (profile.goals?.toLowerCase().includes('serious') || profile.goals?.toLowerCase().includes('relationship')) {
+      response += `For serious relationships: Focus on **coworking spaces**, **language exchanges**, and **sports groups** - you'll meet people with similar lifestyles and intentions.\n\n`;
+    }
+    if (profile.goals?.toLowerCase().includes('casual') || profile.goals?.toLowerCase().includes('fun')) {
+      response += `For casual dating: **Bairro Alto nightlife**, **Lux Frágil**, and **Timeout Market** are great for spontaneous connections.\n\n`;
+    }
+    
+    if (profile.orientation === 'gay') {
+      response += `🌈 **LGBTQ+ Specific:** Príncipe Real neighborhood has several gay-friendly bars. **Finalmente Club** is a legendary drag bar. Check **Lisbon Gay Meetup** groups on Facebook.\n\n`;
+    }
+  }
+  
+  response += `💡 **Pro tip:** The best strategy is to become a "regular" somewhere - a café, coworking space, or gym. Portuguese appreciate familiarity and you'll naturally meet people over time.`;
+  
+  return response;
+}
+
 export default function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [showProfile, setShowProfile] = useState(true);
+  const [showMeetingGuide, setShowMeetingGuide] = useState(false);
   const [profile, setProfile] = useState<UserProfile>({
     nationality: '',
     age: '',
@@ -377,7 +559,7 @@ ${profile.interestedIn ? `I'll tailor my advice for someone interested in ${prof
 **Where would you like to start?** You can ask me about:
 • 🍽️ Restaurants for dates
 • 🌅 Romantic spots
-• 👥 Meeting singles
+• 👥 Where to meet singles
 • 💬 Conversation tips
 • 🇵🇹 Dating culture
 
@@ -441,6 +623,22 @@ Or click a topic below to explore!`
     setMessages(prev => [...prev, userMessage, assistantMessage]);
   };
 
+  const openGoogleSearch = (name: string) => {
+    const query = encodeURIComponent(`${name} Lisbon Portugal`);
+    window.open(`https://www.google.com/search?q=${query}`, '_blank', 'noopener,noreferrer');
+  };
+
+  const categoryIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+    nightlife: PartyPopper,
+    coworking: Laptop,
+    socialEvents: Calendar,
+    activities: Sparkles,
+    sports: Dumbbell,
+    languageExchange: Languages,
+    cultural: Palette,
+    expatHotspots: Globe,
+  };
+
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]" data-theme={theme}>
       {/* Header */}
@@ -457,13 +655,22 @@ Or click a topic below to explore!`
           </div>
           <div className="flex items-center gap-2">
             {!showProfile && (
-              <button
-                onClick={() => setShowProfile(true)}
-                className="p-2 rounded-xl hover:bg-[var(--border)] transition-colors"
-                aria-label="Edit profile"
-              >
-                <User className="w-5 h-5" />
-              </button>
+              <>
+                <button
+                  onClick={() => setShowMeetingGuide(true)}
+                  className="px-3 py-2 rounded-xl bg-[var(--accent)] text-white text-sm font-medium hover:opacity-90 transition-all flex items-center gap-2"
+                >
+                  <Users className="w-4 h-4" />
+                  Meeting Guide
+                </button>
+                <button
+                  onClick={() => setShowProfile(true)}
+                  className="p-2 rounded-xl hover:bg-[var(--border)] transition-colors"
+                  aria-label="Edit profile"
+                >
+                  <User className="w-5 h-5" />
+                </button>
+              </>
             )}
             <button
               onClick={toggleTheme}
@@ -605,6 +812,132 @@ Or click a topic below to explore!`
                   <span>Start Exploring</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Meeting Guide Modal */}
+        {showMeetingGuide && (
+          <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in-up">
+            <div className="glass rounded-2xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-semibold">Where to Meet People in Lisbon</h2>
+                  <p className="text-sm text-[var(--muted)] mt-1">Complete guide for digital nomads</p>
+                </div>
+                <button
+                  onClick={() => setShowMeetingGuide(false)}
+                  className="p-2 rounded-lg hover:bg-[var(--border)] transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Category Sections */}
+              <div className="space-y-6">
+                {Object.entries(meetingPlaces).map(([category, places], catIndex) => {
+                  if (category === 'datingAppsTips') return null;
+                  const Icon = categoryIcons[category] || Users;
+                  const categoryNames: Record<string, string> = {
+                    nightlife: '🌙 Nightlife & Bars',
+                    coworking: '💼 Coworking Spaces',
+                    socialEvents: '📅 Social Events & Meetups',
+                    activities: '🎯 Activities & Hotspots',
+                    sports: '🏃 Sports & Fitness',
+                    languageExchange: '🗣️ Language Exchange',
+                    cultural: '🎨 Cultural Events',
+                    expatHotspots: '🌍 Expat Hotspots',
+                  };
+                  
+                  return (
+                    <div key={category} className="animate-fade-in-up" style={{ animationDelay: `${catIndex * 0.1}s` }}>
+                      <div className="flex items-center gap-2 mb-3">
+                        <Icon className="w-5 h-5 text-[var(--accent)]" />
+                        <h3 className="font-semibold">{categoryNames[category] || category}</h3>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {places.map((place, i) => (
+                          <div
+                            key={i}
+                            className="p-4 rounded-xl border border-[var(--border)] hover:border-[var(--accent)]/30 transition-all group"
+                          >
+                            <div className="flex items-start justify-between gap-2 mb-2">
+                              <h4 className="font-medium text-sm">{place.name}</h4>
+                              <span className="text-xs px-2 py-0.5 rounded-full bg-[var(--border)]">{place.type}</span>
+                            </div>
+                            <p className="text-xs text-[var(--muted)] mb-2">{place.desc}</p>
+                            <p className="text-xs mb-2"><span className="font-medium">Crowd:</span> {place.crowd}</p>
+                            <div className="flex items-center justify-between">
+                              <p className="text-xs text-[var(--accent)]">💡 {place.tip}</p>
+                              <button
+                                onClick={() => openGoogleSearch(place.name)}
+                                className="text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 text-[var(--accent)]"
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                                Search
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* Dating Apps Section */}
+                <div className="animate-fade-in-up" style={{ animationDelay: '0.8s' }}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Heart className="w-5 h-5 text-[var(--accent)]" />
+                    <h3 className="font-semibold">📱 Dating Apps in Lisbon</h3>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    {meetingPlaces.datingAppsTips.map((app, i) => (
+                      <div
+                        key={i}
+                        className="p-4 rounded-xl border border-[var(--border)] hover:border-[var(--accent)]/30 transition-all"
+                      >
+                        <h4 className="font-medium text-sm mb-1">{app.app}</h4>
+                        <p className="text-xs text-[var(--muted)] mb-2">{app.tip}</p>
+                        <p className="text-xs"><span className="font-medium">Best for:</span> {app.crowd}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Personalized Tips */}
+                {(profile.age || profile.goals || profile.orientation === 'gay') && (
+                  <div className="animate-fade-in-up p-4 rounded-xl bg-[var(--accent)]/5 border border-[var(--accent)]/20" style={{ animationDelay: '0.9s' }}>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Star className="w-5 h-5 text-[var(--accent)]" />
+                      <h3 className="font-semibold">🎯 Personalized for You</h3>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      {profile.age === '18-25' || profile.age === '26-35' ? (
+                        <p>• Based on your age: <strong>Lux Frágil</strong>, <strong>Bairro Alto</strong>, and <strong>LX Factory</strong> have the youngest, most dynamic crowds.</p>
+                      ) : null}
+                      {profile.age === '36-45' || profile.age === '46+' ? (
+                        <p>• Based on your age: <strong>Pensão Amor</strong>, <strong>Topo Chiado</strong>, and <strong>Internations events</strong> have more sophisticated crowds.</p>
+                      ) : null}
+                      {profile.goals?.toLowerCase().includes('serious') || profile.goals?.toLowerCase().includes('relationship') ? (
+                        <p>• For serious relationships: Focus on <strong>coworking spaces</strong>, <strong>language exchanges</strong>, and <strong>sports groups</strong>.</p>
+                      ) : null}
+                      {profile.goals?.toLowerCase().includes('casual') || profile.goals?.toLowerCase().includes('fun') ? (
+                        <p>• For casual dating: <strong>Bairro Alto nightlife</strong>, <strong>Lux Frágil</strong>, and <strong>Timeout Market</strong> are great.</p>
+                      ) : null}
+                      {profile.orientation === 'gay' ? (
+                        <p>• 🌈 LGBTQ+: <strong>Príncipe Real</strong> neighborhood has gay-friendly bars. <strong>Finalmente Club</strong> is legendary. Check Lisbon Gay Meetup groups.</p>
+                      ) : null}
+                    </div>
+                  </div>
+                )}
+
+                {/* Pro Tip */}
+                <div className="text-center p-4 rounded-xl bg-[var(--border)]">
+                  <p className="text-sm text-[var(--muted)]">
+                    💡 <strong>Pro tip:</strong> The best strategy is to become a "regular" somewhere - a café, coworking space, or gym. Portuguese appreciate familiarity and you'll naturally meet people over time.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
